@@ -1,0 +1,16 @@
+{
+  "name": "沖繩自駕 2026 · 6人行",
+  "short_name": "沖繩 2026",
+  "description": "17–24 June 2026 沖繩自駕行程 dashboard（3 對情侶）",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f7f8",
+  "theme_color": "#0e8a8a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%230e8a8a'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E%F0%9F%8F%96%EF%B8%8F%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

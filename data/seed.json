@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "title": "沖繩自駕 2026",
+    "subtitle": "17–24 June · 3 對情侶 · 6 人",
+    "hotel": "HOTEL ANTEROOM NAHA（那覇市前島，近泊港）· 23 號住",
+    "updated": "seed / memo"
+  },
+  "itinerary": [
+    { "day": "Day 1", "date": "2026-06-17 (三)", "time": "20:00", "icon": "🍽️", "title": "夕食 · 琉球壽司 築地青空三代目", "place": "那覇", "address": "那覇市", "note": "已訂 8pm", "booked": "Y" },
+
+    { "day": "Day 2", "date": "2026-06-18 (四)", "time": "09:30", "icon": "🚗", "title": "取車 · ユニバースレンタカー 那覇空港店", "place": "豊見城市", "address": "沖縄県豊見城市伊良波518-1", "note": "預約 EX-2604160680。機場 1F 搭近距離taxi去，退1程車費（攞收據）", "booked": "Y" },
+    { "day": "Day 2", "date": "2026-06-18 (四)", "time": "10:30", "icon": "🐟", "title": "泊港魚市場", "place": "那覇", "address": "那覇市港町", "note": "", "booked": "" },
+    { "day": "Day 2", "date": "2026-06-18 (四)", "time": "11:15", "icon": "🐬", "title": "美麗海水族館", "place": "本部町", "address": "国営沖縄記念公園 美ら海水族館", "note": "🐬 海豚表演 15:00", "booked": "" },
+    { "day": "Day 2", "date": "2026-06-18 (四)", "time": "15:30", "icon": "🏝️", "title": "古宇利島", "place": "今帰仁村", "address": "古宇利島", "note": "", "booked": "" },
+    { "day": "Day 2", "date": "2026-06-18 (四)", "time": "20:00", "icon": "🍽️", "title": "百年古家 大家 · 阿古豬", "place": "本部町", "address": "百年古家 大家 本部町", "note": "⏳ 需訂枱 17:30–21:00，留意尾叫單", "booked": "" },
+
+    { "day": "Day 3", "date": "2026-06-19 (五)", "time": "08:30", "icon": "🛥️", "title": "水納島 · 浮潛＋滑翔", "place": "本部町", "address": "渡久地港 水納島", "note": "", "booked": "" },
+    { "day": "Day 3", "date": "2026-06-19 (五)", "time": "12:00", "icon": "🛥️", "title": "瀨底島 · 玻璃船 Okinawa Marine Studio", "place": "本部町", "address": "瀬底島", "note": "試 walk-in", "booked": "" },
+    { "day": "Day 3", "date": "2026-06-19 (五)", "time": "20:00", "icon": "🍖", "title": "燒肉 本部牧場 名護店", "place": "名護", "address": "本部牧場 名護店", "note": "已訂 8pm", "booked": "Y" },
+
+    { "day": "Day 4", "date": "2026-06-20 (六)", "time": "上午", "icon": "🌊", "title": "許田休息站 → 萬座毛 → 恩納村", "place": "恩納", "address": "万座毛 恩納村", "note": "", "booked": "" },
+    { "day": "Day 4", "date": "2026-06-20 (六)", "time": "~15:00", "icon": "⚠️", "title": "最遲離開恩納（避 58 號傍晚塞車）", "place": "恩納", "address": "", "note": "趕 16:30 還 Porsche", "booked": "" },
+    { "day": "Day 4", "date": "2026-06-20 (六)", "time": "16:30", "icon": "🚗", "title": "還 Porsche ＋ 取新車 @ 那覇機場", "place": "那覇機場", "address": "那覇空港", "note": "換車約 30 分鐘", "booked": "" },
+    { "day": "Day 4", "date": "2026-06-20 (六)", "time": "17:30", "icon": "🛍️", "title": "美國村", "place": "北谷町", "address": "美浜アメリカンビレッジ", "note": "機場去約 35–40 分鐘", "booked": "" },
+    { "day": "Day 4", "date": "2026-06-20 (六)", "time": "20:00", "icon": "🎆", "title": "美國村煙花 · Depot Island 海濱步道", "place": "北谷町", "address": "Depot Island 北谷", "note": "✅ 約 1 分鐘。落雨照放，強風先取消（取消當日 14:00 IG 公佈）", "booked": "Y" },
+
+    { "day": "Day 5", "date": "2026-06-21 (日)", "time": "全日", "icon": "🗳️", "title": "未排 — 去『投票』揀景點", "place": "—", "address": "", "note": "候選：瀨長島／知念岬／玉泉洞／港川 cafe…", "booked": "" },
+    { "day": "Day 6", "date": "2026-06-22 (一)", "time": "全日", "icon": "🗳️", "title": "未排 — 去『投票』揀景點", "place": "—", "address": "", "note": "", "booked": "" },
+
+    { "day": "Day 7", "date": "2026-06-23 (二)", "time": "09:00", "icon": "🎣", "title": "釣魚（乘合）＋ 中午食自己條魚", "place": "那覇", "address": "那覇沿岸漁港 / 三重城港", "note": "⏳ 未訂。船家候選見『訂位』。下午 free 行國際通。住 ANTEROOM", "booked": "" },
+
+    { "day": "Day 8", "date": "2026-06-24 (三)", "time": "全日", "icon": "🛍️", "title": "未排 + 還車 / 機場", "place": "那覇", "address": "那覇空港", "note": "", "booked": "" }
+  ],
+  "bookings": [
+    { "item": "Day 1 · 築地青空三代目", "status": "✅", "detail": "已訂 8pm", "owner": "", "link": "" },
+    { "item": "Day 3 · 燒肉 本部牧場 名護店", "status": "✅", "detail": "已訂 8pm", "owner": "", "link": "" },
+    { "item": "Day 4 · 美國村煙花", "status": "✅", "detail": "6/20 20:00 已確認", "owner": "", "link": "" },
+    { "item": "Day 2 · 百年古家 大家（訂枱）", "status": "⏳", "detail": "需預約 17:30–21:00", "owner": "", "link": "" },
+    { "item": "第二架車 20–24（近機場取）", "status": "⏳", "detail": "6 人要 7 座，方便 20 號機場換車", "owner": "", "link": "" },
+    { "item": "21–24 行程", "status": "⏳", "detail": "用候選 pool 投票後順車程排", "owner": "", "link": "" },
+    { "item": "23/6 釣魚（乘合＋食魚）", "status": "⏳", "detail": "A.セルリアンブルー ¥8000(那覇沿岸,半日,朝7:30) / B.かなは ¥8000(糸満,2h午,アカジン) / C.ミツワ貸切(三重城,船長居酒屋煮)", "owner": "", "link": "https://oki-raku.net/fishing/2966/" },
+    { "item": "Day 4 換車時間核對", "status": "⏳", "detail": "15:00 離恩納 → 16:30 還 Porsche → 17:30 到美國村", "owner": "", "link": "" },
+    { "item": "IDP 國際駕照（每人）", "status": "⏳", "detail": "護照＋IDP＋香港駕照正本，取車人=訂車人", "owner": "全部", "link": "" }
+  ],
+  "cars": [
+    { "car": "車① Porsche Boxster", "seats": "2 座", "vendor": "Universe 那覇空港店", "pickup": "18/6 09:30", "dropoff": "20/6 16:30", "members": "TBD（淨載 1 對）", "note": "⚠️ 2 座尾箱細，當 day trip。預約 EX-2604160680 · TEL 0120-773-001 · ¥42,910" },
+    { "car": "車② 未訂", "seats": "建議 7 座", "vendor": "機場附近（待訂）", "pickup": "20/6", "dropoff": "24/6", "members": "TBD", "note": "6 人＋行李，建議 7 座；20 號機場一次過換車" },
+    { "car": "⚠️ 人車提示", "seats": "6 人", "vendor": "—", "pickup": "", "dropoff": "", "members": "—", "note": "Porsche 淨載到 1 對 → 全程實際要 ≥2 架車，分車分位要早啲傾" }
+  ],
+  "members": [
+    { "name": "情侶A-1（Jacky?）", "couple": "A", "color": "#e8635a" },
+    { "name": "情侶A-2", "couple": "A", "color": "#e8635a" },
+    { "name": "情侶B-1", "couple": "B", "color": "#0e8a8a" },
+    { "name": "情侶B-2", "couple": "B", "color": "#0e8a8a" },
+    { "name": "情侶C-1", "couple": "C", "color": "#d99a2b" },
+    { "name": "情侶C-2", "couple": "C", "color": "#d99a2b" }
+  ],
+  "expenses": [],
+  "votes": [
+    { "spot": "瀨長島", "area": "南部", "votes": "0", "note": "Umikaji Terrace" },
+    { "spot": "知念岬公園", "area": "南部", "votes": "0", "note": "" },
+    { "spot": "玉泉洞", "area": "南部", "votes": "0", "note": "おきなわワールド" },
+    { "spot": "波上宮", "area": "那覇", "votes": "0", "note": "" },
+    { "spot": "西来院（達磨寺）", "area": "那覇", "votes": "0", "note": "" },
+    { "spot": "萬座毛", "area": "中部", "votes": "0", "note": "" },
+    { "spot": "21世紀の森公園", "area": "名護", "votes": "0", "note": "海邊 Starbucks" },
+    { "spot": "國際通", "area": "那覇", "votes": "0", "note": "行街/購物" },
+    { "spot": "第一牧志公設市場", "area": "那覇", "votes": "0", "note": "" },
+    { "spot": "扭蛋 / Calbee / 御菓子御殿", "area": "那覇", "votes": "0", "note": "手信" },
+    { "spot": "Donki / 藥妝", "area": "那覇", "votes": "0", "note": "" },
+    { "spot": "JAM MARKET", "area": "那覇", "votes": "0", "note": "" },
+    { "spot": "港川 COCOROAR CAFE", "area": "浦添", "votes": "0", "note": "外人住宅街" },
+    { "spot": "港川 Houki Boshi 可麗露", "area": "浦添", "votes": "0", "note": "" },
+    { "spot": "釣魚", "area": "那覇", "votes": "0", "note": "已排 23/6 上午" },
+    { "spot": "ATV 越野車", "area": "—", "votes": "0", "note": "" }
+  ],
+  "phrases": [
+    { "title": "搭的士去車行", "jp": "ユニバースレンタカー 那覇空港店までお願いします。住所：沖縄県豊見城市伊良波518-1／電話：0120-773-001", "romaji": "", "zh": "畀司機睇手機。名嘉地交差点を糸満方面へ行ってすぐ左手側" },
+    { "title": "攞收據（退車費）", "jp": "領収書（りょうしゅうしょ）ください。", "romaji": "Ryōshūsho kudasai", "zh": "退的士車費要呢張單" },
+    { "title": "釣魚船家 A · セルリアンブルー", "jp": "那覇沿岸漁港（港町3-1-17）· 乗合 · 1名可", "romaji": "", "zh": "¥8000/人，半日約5h，朝7:30/午12:30，魚お持ち帰り。oki-raku.net 訂" },
+    { "title": "釣魚船家 B · かなはフィッシング", "jp": "糸満フィッシャリーナ · 乗合 · 2時間 · アカジン", "romaji": "", "zh": "¥8000/人，午 13:00/15:30，最少 3 人催行。asoview pln3000027617" },
+    { "title": "釣魚船家 C · ミツワ", "jp": "三重城港 · 貸切 · 098-943-8595", "romaji": "", "zh": "包船 ¥44,000/4人。船長自己居酒屋幫你煮（另計）。最近酒店" },
+    { "title": "食魚 · 持ち込み居酒屋", "jp": "海鮮酒場 琉星（久茂地，國際通行 1 分鐘）", "romaji": "", "zh": "攞自己釣嘅魚去代煮，約 ¥1,000–2,000" }
+  ]
+}
