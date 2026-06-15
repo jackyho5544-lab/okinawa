@@ -13,6 +13,7 @@
 - 💰 **夾數** — 入支出自動計人均 + 找數建議
 - 🗳️ **投票** — 3 對情侶投 21–24 候選景點，自動排名（Form 範本見 [`GOOGLE_FORM_VOTING.md`](GOOGLE_FORM_VOTING.md)）
 - 🗒️ **用語** — 日文短句 / 船家 / 預約資料，一撳複製
+- ✏️ **App 內編輯** — 每個 tab 改/加/刪，密碼閘住，儲存即寫返共享 Sheet（需部署 Apps Script，見 [`APPS_SCRIPT_SETUP.md`](APPS_SCRIPT_SETUP.md)）
 
 ## 點上線（GitHub Pages）
 1. push 上 `jackyho5544-lab/okinawa`（見下面指令）。

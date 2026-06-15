@@ -5,6 +5,18 @@
 const CFG = window.OKINAWA_CONFIG || {};
 const TABS = ["meta","stays","itinerary","bookings","cars","members","expenses","votes","phrases"];
 let DATA = {};
+let CURRENT = "itinerary";
+let EDIT = null;
+// 可 in-app 編輯嘅 tab 同欄位順序（要同 Sheet 一致）
+const COLUMNS = {
+  itinerary: ["day","date","time","icon","title","place","address","note","booked"],
+  stays: ["name","dates","address","map","checkin","checkout","note"],
+  bookings: ["item","status","detail","owner","link"],
+  cars: ["car","seats","vendor","pickup","dropoff","members","note"],
+  expenses: ["date","item","payer","amount","split","note"],
+  votes: ["spot","area","votes","note"],
+  phrases: ["title","jp","romaji","zh"]
+};
 
 const $ = (s, r = document) => r.querySelector(s);
 const el = (t, c, html) => { const e = document.createElement(t); if (c) e.className = c; if (html != null) e.innerHTML = html; return e; };
@@ -58,13 +70,14 @@ async function loadData() {
 function setSource(t) { const b = $("#data-source"); if (b) b.textContent = t; }
 
 /* ---- Views ---- */
-function editBar(label) {
-  if (!CFG.sheetEditUrl) return "";
-  return `<a class="edit-link" href="${esc(CFG.sheetEditUrl)}" target="_blank" rel="noopener">✏️ ${esc(label)}</a>`;
+function editBar(tab) {
+  if (CFG.scriptUrl && COLUMNS[tab]) return `<button class="edit-link" data-edit="${esc(tab)}">✏️ 編輯</button>`;
+  if (CFG.sheetEditUrl) return `<a class="edit-link" href="${esc(CFG.sheetEditUrl)}" target="_blank" rel="noopener">✏️ 改</a>`;
+  return "";
 }
 
 function viewItinerary() {
-  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>📅 行程</h2>${editBar("改行程")}</div>`;
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>📅 行程</h2>${editBar("itinerary")}</div>`;
   const rows = DATA.itinerary || [];
   let cur = null;
   rows.forEach(r => {
@@ -93,7 +106,7 @@ function viewItinerary() {
 }
 
 function viewBookings() {
-  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>✅ 訂位進度</h2>${editBar("改狀態")}</div>`;
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>✅ 訂位進度</h2>${editBar("bookings")}</div>`;
   const rows = (DATA.bookings || []).slice().sort((a, b) => (a.status === "✅" ? 1 : 0) - (b.status === "✅" ? 1 : 0));
   rows.forEach(r => {
     const card = el("div", "card");
@@ -112,7 +125,7 @@ function viewBookings() {
 }
 
 function viewCars() {
-  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🚗 分車 / 座位</h2>${editBar("改分車")}</div>`;
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🚗 分車 / 座位</h2>${editBar("cars")}</div>`;
   v.appendChild(el("div", "hint", "20–24 共用車（建議 7 座載 6 人＋行李）。其餘車輛安排由各自負責人處理。"));
   (DATA.cars || []).forEach(r => {
     const warn = String(r.car).includes("⚠️");
@@ -133,7 +146,7 @@ function viewCars() {
 
 /* 夾數：payer 畀錢、split 攤分（"all" 或逗號分隔名），自動計找數 */
 function viewExpenses() {
-  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>💰 夾數</h2>${editBar("入帳")}</div>`;
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>💰 夾數</h2>${editBar("expenses")}</div>`;
   const members = (DATA.members || []).map(m => m.name);
   const exps = DATA.expenses || [];
   if (!exps.length) {
@@ -188,7 +201,8 @@ function viewExpenses() {
 
 function viewVotes() {
   const v = $("#view");
-  const link = CFG.voteFormUrl ? `<a class="edit-link" href="${esc(CFG.voteFormUrl)}" target="_blank" rel="noopener">🗳️ 投票</a>` : editBar("改票數");
+  const link = (CFG.scriptUrl || CFG.sheetEditUrl) ? editBar("votes")
+    : (CFG.voteFormUrl ? `<a class="edit-link" href="${esc(CFG.voteFormUrl)}" target="_blank" rel="noopener">🗳️ 投票</a>` : "");
   v.innerHTML = `<div class="section-bar"><h2>🗳️ 21–24 景點投票</h2>${link}</div>`;
   v.appendChild(el("div", "hint", "3 對情侶各自投，票數高嘅優先排入 21–24。喺 Sheet 嘅 votes tab 改 votes 數字（或駁 Google Form）。"));
   const rows = (DATA.votes || []).map(r => ({ ...r, _v: parseInt(String(r.votes).replace(/[^0-9]/g, "")) || 0 })).sort((a, b) => b._v - a._v);
@@ -208,7 +222,7 @@ function viewVotes() {
 }
 
 function viewPhrases() {
-  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🗒️ 日文用語 / 預約資料</h2></div>`;
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🗒️ 日文用語 / 預約資料</h2>${editBar("phrases")}</div>`;
   (DATA.phrases || []).forEach(r => {
     const card = el("div", "phrase");
     card.innerHTML =
@@ -225,7 +239,7 @@ function viewPhrases() {
 }
 
 function viewStays() {
-  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🏨 住宿</h2>${editBar("改住宿")}</div>`;
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🏨 住宿</h2>${editBar("stays")}</div>`;
   (DATA.stays || []).forEach(r => {
     const warn = String(r.note).includes("⚠️");
     const map = r.map
@@ -247,9 +261,76 @@ function viewStays() {
   });
 }
 
+/* ---- In-app 編輯（經 Apps Script 寫返去 Sheet）---- */
+function startEdit(tab) {
+  if (!CFG.scriptUrl) { alert("未設定 scriptUrl：去 config.js 填 Apps Script 嘅 /exec URL（教學見 APPS_SCRIPT_SETUP.md）"); return; }
+  if (!COLUMNS[tab]) return;
+  EDIT = { tab, rows: (DATA[tab] || []).map(r => ({ ...r })) };
+  renderEditor();
+}
+function renderEditor() {
+  const tab = EDIT.tab, cols = COLUMNS[tab];
+  const long = { note: 1, detail: 1, jp: 1, address: 1 };
+  const v = $("#view");
+  v.innerHTML =
+    `<div class="section-bar"><h2>✏️ 改緊：${esc(tab)}</h2>
+       <span class="ed-actions"><button class="edit-link" id="ed-save">💾 儲存</button><button class="edit-link gray" id="ed-cancel">取消</button></span>
+     </div>
+     <div class="hint">改完撳「儲存」會一次過寫返去大家共享嘅 Sheet（Sheet 同步約 1–2 分鐘）。</div>`;
+  EDIT.rows.forEach((row, idx) => {
+    const card = el("div", "card edit-card");
+    card.innerHTML =
+      `<div class="erow-head"><b>#${idx + 1}</b><button class="del-row" data-i="${idx}">🗑️ 刪呢行</button></div>` +
+      cols.map(c => long[c]
+        ? `<label class="efield"><span>${esc(c)}</span><textarea data-i="${idx}" data-c="${esc(c)}" rows="2">${esc(row[c] || "")}</textarea></label>`
+        : `<label class="efield"><span>${esc(c)}</span><input data-i="${idx}" data-c="${esc(c)}" value="${esc(row[c] || "")}"></label>`).join("");
+    v.appendChild(card);
+  });
+  const add = el("button", "add-row", "＋ 加一行");
+  v.appendChild(add);
+  v.querySelectorAll("[data-c]").forEach(inp => inp.addEventListener("input", e => {
+    EDIT.rows[+e.target.dataset.i][e.target.dataset.c] = e.target.value;
+  }));
+  v.querySelectorAll(".del-row").forEach(b => b.addEventListener("click", e => {
+    EDIT.rows.splice(+e.currentTarget.dataset.i, 1); renderEditor();
+  }));
+  add.addEventListener("click", () => { const o = {}; cols.forEach(c => o[c] = ""); EDIT.rows.push(o); renderEditor(); });
+  $("#ed-cancel").addEventListener("click", () => { const t = EDIT.tab; EDIT = null; show(t); });
+  $("#ed-save").addEventListener("click", saveEdit);
+}
+async function saveEdit() {
+  const tab = EDIT.tab, cols = COLUMNS[tab];
+  const token = getToken(); if (token == null) return;
+  const btn = $("#ed-save"); btn.textContent = "儲存緊…"; btn.disabled = true;
+  const payload = JSON.stringify({ token, tab, columns: cols, rows: EDIT.rows });
+  let result = null;
+  try {
+    const res = await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: payload });
+    try { result = await res.json(); } catch (_) { /* CORS 可能讀唔到 body，但寫入通常已成功 */ }
+  } catch (_) { /* 同上 */ }
+  if (result && result.ok === false) {
+    if (/密碼|token/i.test(result.error || "")) localStorage.removeItem("okinawa_token");
+    alert("儲存失敗：" + (result.error || "未知")); btn.textContent = "💾 儲存"; btn.disabled = false; return;
+  }
+  DATA[tab] = EDIT.rows.map(r => ({ ...r })); // 樂觀更新，即刻見到
+  EDIT = null; show(tab);
+  toast(result && result.ok ? "✅ 已儲存" : "✅ 已送出（Sheet 約 1–2 分鐘同步）");
+}
+function getToken() {
+  let t = localStorage.getItem("okinawa_token");
+  if (!t) { const x = prompt("輸入編輯密碼（問 Jacky）："); if (x == null || x.trim() === "") return null; t = x.trim(); localStorage.setItem("okinawa_token", t); }
+  return t;
+}
+function toast(msg) {
+  const d = el("div", "toast", esc(msg)); document.body.appendChild(d);
+  requestAnimationFrame(() => d.classList.add("show"));
+  setTimeout(() => { d.classList.remove("show"); setTimeout(() => d.remove(), 300); }, 2600);
+}
+
 const VIEWS = { itinerary: viewItinerary, stays: viewStays, bookings: viewBookings, cars: viewCars, expenses: viewExpenses, votes: viewVotes, phrases: viewPhrases };
 
 function show(name) {
+  CURRENT = name;
   document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === name));
   (VIEWS[name] || viewItinerary)();
   window.scrollTo(0, 0);
@@ -258,6 +339,7 @@ function show(name) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => show(t.dataset.view)));
+  document.addEventListener("click", e => { const b = e.target.closest("[data-edit]"); if (b) startEdit(b.dataset.edit); });
   await loadData();
   const m = DATA.meta || {};
   if (m.title) $("#m-title").textContent = m.title;

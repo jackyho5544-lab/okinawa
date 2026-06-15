@@ -11,6 +11,10 @@ window.OKINAWA_CONFIG = {
   // 改行程 / 夾數 / 投票 嘅 Google Sheet 連結（畀朋友撳去改）
   sheetEditUrl: "https://docs.google.com/spreadsheets/d/1W9ap4IFaOAIl6XF4ac4AlSddfz-VhoQKj2EwUvsFU0o/edit",
 
+  // App 內直接編輯（寫返去 Sheet）的 Apps Script Web App /exec URL
+  // 部署教學見 APPS_SCRIPT_SETUP.md。填咗之後，每個 tab 會出「✏️ 編輯」掣。
+  scriptUrl: "",
+
   // 投票用嘅 Google Form 連結（可選）
   voteFormUrl: "",
 

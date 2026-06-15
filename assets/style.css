@@ -120,3 +120,22 @@ a{color:var(--teal-d)}
 .tab span{font-size:19px;line-height:1}
 .tab.active{color:var(--teal-d);font-weight:700}
 .empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:13.5px}
+
+/* In-app 編輯器 */
+.ed-actions{display:flex;gap:6px}
+.edit-link.gray{background:#90a4a4}
+.edit-card{padding:10px 12px}
+.erow-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;
+  font-size:13px;color:var(--teal-d);border-bottom:1px solid var(--line);padding-bottom:6px}
+.del-row{border:0;background:#fdecea;color:#c0392b;font-size:12px;padding:4px 10px;border-radius:16px;font-family:inherit}
+.efield{display:block;margin:0 0 8px}
+.efield span{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.efield input,.efield textarea{width:100%;border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px;font-size:14px;font-family:inherit;color:var(--ink);background:#fbfdfd;resize:vertical}
+.efield input:focus,.efield textarea:focus{outline:none;border-color:var(--teal);background:#fff}
+.add-row{display:block;width:100%;border:1.5px dashed var(--teal);background:#f1fafa;color:var(--teal-d);
+  padding:11px;border-radius:12px;font-size:14px;font-family:inherit;margin-bottom:10px}
+.toast{position:fixed;left:50%;bottom:calc(84px + var(--safe-b));transform:translateX(-50%) translateY(10px);
+  background:#1d2b2b;color:#fff;padding:10px 18px;border-radius:22px;font-size:13.5px;z-index:50;
+  opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
