@@ -6,10 +6,10 @@
 // ───────────────────────────────────────────────────────────
 window.OKINAWA_CONFIG = {
   // 例：https://docs.google.com/spreadsheets/d/【呢段就係 sheetId】/edit
-  sheetId: "",
+  sheetId: "1W9ap4IFaOAIl6XF4ac4AlSddfz-VhoQKj2EwUvsFU0o",
 
   // 改行程 / 夾數 / 投票 嘅 Google Sheet 連結（畀朋友撳去改）
-  sheetEditUrl: "",
+  sheetEditUrl: "https://docs.google.com/spreadsheets/d/1W9ap4IFaOAIl6XF4ac4AlSddfz-VhoQKj2EwUvsFU0o/edit",
 
   // 投票用嘅 Google Form 連結（可選）
   voteFormUrl: "",

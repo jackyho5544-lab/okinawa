@@ -11,17 +11,27 @@ const el = (t, c, html) => { const e = document.createElement(t); if (c) e.class
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
 const mapsUrl = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
 
-/* ---- Google Sheet gviz 解析 ---- */
-async function fetchSheetTab(sheetId, tab) {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
-  const txt = await (await fetch(url)).text();
-  const json = JSON.parse(txt.replace(/^[^(]*\(/, "").replace(/\);?\s*$/, ""));
+/* ---- Google Sheet gviz 解析（用 JSONP 繞過 CORS）---- */
+function parseGviz(json) {
   const cols = json.table.cols.map(c => (c.label || "").trim());
   return json.table.rows.map(r => {
     const o = {};
     (r.c || []).forEach((cell, i) => { if (cols[i]) o[cols[i]] = cell ? (cell.v == null ? "" : cell.v) : ""; });
     return o;
   }).filter(o => Object.values(o).some(v => String(v).trim() !== ""));
+}
+function fetchSheetTab(sheetId, tab) {
+  return new Promise((resolve, reject) => {
+    const cb = "__gviz_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    let done = false;
+    const cleanup = () => { try { delete window[cb]; } catch (_) { window[cb] = undefined; } s.remove(); };
+    const timer = setTimeout(() => { if (!done) { done = true; cleanup(); reject(new Error("timeout " + tab)); } }, 12000);
+    window[cb] = json => { done = true; clearTimeout(timer); cleanup(); try { resolve(parseGviz(json)); } catch (e) { reject(e); } };
+    s.onerror = () => { if (!done) { done = true; clearTimeout(timer); cleanup(); reject(new Error("load fail " + tab)); } };
+    s.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(tab)}`;
+    document.head.appendChild(s);
+  });
 }
 
 async function loadData() {
