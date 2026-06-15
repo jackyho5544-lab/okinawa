@@ -46,12 +46,12 @@
     { "car": "共用車（20–24）", "seats": "建議 7 座", "vendor": "機場附近（待訂）", "pickup": "20/6", "dropoff": "24/6", "members": "全體", "note": "6 人＋行李，建議 7 座；20 號機場一次過換車" }
   ],
   "members": [
-    { "name": "情侶A-1（Jacky?）", "couple": "A", "color": "#e8635a" },
-    { "name": "情侶A-2", "couple": "A", "color": "#e8635a" },
-    { "name": "情侶B-1", "couple": "B", "color": "#0e8a8a" },
-    { "name": "情侶B-2", "couple": "B", "color": "#0e8a8a" },
-    { "name": "情侶C-1", "couple": "C", "color": "#d99a2b" },
-    { "name": "情侶C-2", "couple": "C", "color": "#d99a2b" }
+    { "name": "Jacky", "couple": "A", "color": "#e8635a" },
+    { "name": "CF", "couple": "A", "color": "#e8635a" },
+    { "name": "Tina", "couple": "B", "color": "#0e8a8a" },
+    { "name": "Marc", "couple": "B", "color": "#0e8a8a" },
+    { "name": "Shark", "couple": "C", "color": "#d99a2b" },
+    { "name": "Adolf", "couple": "C", "color": "#d99a2b" }
   ],
   "expenses": [],
   "votes": [
