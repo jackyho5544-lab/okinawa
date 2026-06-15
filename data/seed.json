@@ -53,7 +53,14 @@
     { "name": "Shark", "couple": "C", "color": "#d99a2b" },
     { "name": "Adolf", "couple": "C", "color": "#d99a2b" }
   ],
-  "expenses": [],
+  "expenses": [
+    { "date": "6/18", "item": "共用車租金", "payer": "Marc", "amount": "30000", "split": "all", "note": "示範·可刪" },
+    { "date": "6/18", "item": "泊港魚市場午餐", "payer": "Jacky", "amount": "9000", "split": "all", "note": "示範·可刪" },
+    { "date": "6/18", "item": "美麗海水族館門票", "payer": "Tina", "amount": "12000", "split": "all", "note": "示範·可刪" },
+    { "date": "6/18", "item": "大家 阿古豬晚餐", "payer": "CF", "amount": "18000", "split": "all", "note": "示範·可刪" },
+    { "date": "6/19", "item": "燒肉 本部牧場", "payer": "Shark", "amount": "24000", "split": "all", "note": "示範·可刪" },
+    { "date": "6/19", "item": "水納島活動（C 對）", "payer": "Adolf", "amount": "16000", "split": "Shark,Adolf", "note": "示範·subset 攤分" }
+  ],
   "votes": [
     { "spot": "瀨長島", "area": "南部", "votes": "0", "note": "Umikaji Terrace" },
     { "spot": "知念岬公園", "area": "南部", "votes": "0", "note": "" },
