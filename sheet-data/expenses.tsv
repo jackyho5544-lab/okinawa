@@ -1,0 +1,7 @@
+date	item	payer	amount	split	note
+6/18	共用車租金	Marc	30000	all	示範·可刪
+6/18	泊港魚市場午餐	Jacky	9000	all	示範·可刪
+6/18	美麗海水族館門票	Tina	12000	all	示範·可刪
+6/18	大家 阿古豬晚餐	CF	18000	all	示範·可刪
+6/19	燒肉 本部牧場	Shark	24000	all	示範·可刪
+6/19	水納島活動（C 對）	Adolf	16000	Shark,Adolf	示範·subset 攤分
