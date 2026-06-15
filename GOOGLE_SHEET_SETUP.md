@@ -45,11 +45,13 @@
 - `split` 填 `all` = 6 人分；或用逗號列邊幾個分。個網會自動計人均同找數。
 
 ### tab：`votes`（投票）
-| spot | area | votes | note |
-|------|------|-------|------|
-| 瀨長島 | 南部 | 3 | Umikaji Terrace |
+| spot | area | votes | note | voters |
+|------|------|-------|------|--------|
+| 瀨長島 | 南部 | 2 | Umikaji Terrace | Marc,Tina |
 
-- 最簡單：大家直接喺 `votes` 欄 +1。或者駁 Google Form（見下）。
+- **逐人投票**：app 入面揀返「我係邊個」之後，撳景點就會將你個名加入 `voters`，`votes` 數字＝投票人數（自動同步）。
+- `voters` 欄**唔使自己加**：第一次有人投票時，Apps Script 會自動建立。
+- 需要部署咗 Apps Script（見 `APPS_SCRIPT_SETUP.md`）先投到票。
 
 ### tab：`phrases`（用語）
 | title | jp | romaji | zh |

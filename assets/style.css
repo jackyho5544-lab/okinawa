@@ -139,3 +139,30 @@ a{color:var(--teal-d)}
   background:#1d2b2b;color:#fff;padding:10px 18px;border-radius:22px;font-size:13.5px;z-index:50;
   opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 身分 chip */
+.me-chip{position:absolute;top:14px;right:14px;border:0;background:rgba(255,255,255,.2);color:#fff;
+  font-family:inherit;font-size:12px;padding:5px 12px;border-radius:20px;font-weight:600}
+
+/* 揀名 overlay */
+.overlay{position:fixed;inset:0;background:rgba(20,40,40,.45);z-index:60;display:flex;align-items:flex-end;
+  justify-content:center;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{background:#fff;width:100%;max-width:680px;border-radius:18px 18px 0 0;padding:18px 16px calc(20px + var(--safe-b));
+  box-shadow:0 -4px 20px rgba(0,0,0,.2)}
+.sheet-h{font-weight:700;font-size:16px;margin-bottom:14px;text-align:center}
+.pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.pick{padding:14px 6px;border:1.5px solid var(--line);background:#f7fbfb;border-radius:12px;
+  font-size:15px;font-family:inherit;color:var(--ink);font-weight:600}
+.pick:active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.pick-close{width:100%;border:0;background:#eef2f2;color:var(--muted);padding:11px;border-radius:12px;font-family:inherit;font-size:14px}
+
+/* 逐人投票 */
+.vote-summary{background:#eef5f5;border:1px solid var(--line);border-radius:10px;padding:8px 12px;
+  font-size:12.5px;color:#42595a;margin-bottom:10px}
+.vote.tappable{cursor:pointer}
+.vote.tappable:active{transform:scale(.99)}
+.vote.voted{border-color:var(--teal);background:#f0fafa;box-shadow:0 0 0 1px var(--teal) inset}
+.voters{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.vchip{font-size:10.5px;background:#eef5f5;color:#5a6e6e;border-radius:12px;padding:1px 7px}
+.vchip.me{background:var(--teal);color:#fff;font-weight:600}

@@ -14,9 +14,26 @@ const COLUMNS = {
   bookings: ["item","status","detail","owner","link"],
   cars: ["car","seats","vendor","pickup","dropoff","members","note"],
   expenses: ["date","item","payer","amount","split","note"],
-  votes: ["spot","area","votes","note"],
+  votes: ["spot","area","votes","note","voters"],
   phrases: ["title","jp","romaji","zh"]
 };
+
+/* ---- 身分（揀名，存 localStorage；冇 login）---- */
+function getMe() { return localStorage.getItem("okinawa_me") || ""; }
+function setMe(n) { localStorage.setItem("okinawa_me", n); renderMeChip(); }
+function renderMeChip() { const c = $("#me-chip"); if (c) c.textContent = getMe() ? ("👤 " + getMe()) : "👤 揀名"; }
+function pickMe() {
+  const members = (DATA.members || []).map(m => m.name);
+  const ov = el("div", "overlay");
+  ov.innerHTML =
+    `<div class="sheet"><div class="sheet-h">你係邊個？</div>
+       <div class="pick-grid">${members.map(n => `<button class="pick" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+       <button class="pick-close">取消</button></div>`;
+  ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+  ov.querySelectorAll(".pick").forEach(b => b.addEventListener("click", () => { setMe(b.dataset.n); ov.remove(); if (CURRENT === "votes") viewVotes(); }));
+  ov.querySelector(".pick-close").addEventListener("click", () => ov.remove());
+  document.body.appendChild(ov);
+}
 
 const $ = (s, r = document) => r.querySelector(s);
 const el = (t, c, html) => { const e = document.createElement(t); if (c) e.className = c; if (html != null) e.innerHTML = html; return e; };
@@ -201,24 +218,59 @@ function viewExpenses() {
 
 function viewVotes() {
   const v = $("#view");
-  const link = (CFG.scriptUrl || CFG.sheetEditUrl) ? editBar("votes")
-    : (CFG.voteFormUrl ? `<a class="edit-link" href="${esc(CFG.voteFormUrl)}" target="_blank" rel="noopener">🗳️ 投票</a>` : "");
-  v.innerHTML = `<div class="section-bar"><h2>🗳️ 21–24 景點投票</h2>${link}</div>`;
-  v.appendChild(el("div", "hint", "3 對情侶各自投，票數高嘅優先排入 21–24。喺 Sheet 嘅 votes tab 改 votes 數字（或駁 Google Form）。"));
-  const rows = (DATA.votes || []).map(r => ({ ...r, _v: parseInt(String(r.votes).replace(/[^0-9]/g, "")) || 0 })).sort((a, b) => b._v - a._v);
-  const max = Math.max(1, ...rows.map(r => r._v));
+  const me = getMe();
+  v.innerHTML = `<div class="section-bar"><h2>🗳️ 21–24 景點投票</h2>${editBar("votes")}</div>`;
+  if (!me) {
+    const b = el("button", "add-row", "👤 先揀返「我係邊個」至投到票");
+    b.addEventListener("click", pickMe);
+    v.appendChild(b);
+  } else {
+    v.appendChild(el("div", "hint", `你係 <b>${esc(me)}</b>。撳一下景點 = 投票 / 再撳 = 收回。`));
+  }
+  const rows = (DATA.votes || []).map(r => {
+    const voters = String(r.voters || "").split(/[,，、]/).map(s => s.trim()).filter(Boolean);
+    return { ...r, _voters: voters, _n: voters.length };
+  }).sort((a, b) => b._n - a._n);
+  const max = Math.max(1, ...rows.map(r => r._n));
+  // 投票進度
+  const members = (DATA.members || []).map(m => m.name);
+  if (members.length) {
+    const voted = new Set(rows.flatMap(r => r._voters));
+    const notYet = members.filter(n => !voted.has(n));
+    v.appendChild(el("div", "vote-summary", `✅ 已投 ${members.length - notYet.length}/${members.length}` +
+      (notYet.length ? ` · 未投：${notYet.map(esc).join("、")}` : " · 全部投晒 🎉")));
+  }
   rows.forEach((r, i) => {
-    const card = el("div", "vote");
+    const mine = me && r._voters.includes(me);
+    const card = el("div", "vote" + (mine ? " voted" : "") + (me ? " tappable" : ""));
     card.innerHTML =
-      `<div class="rank">${r._v > 0 ? "#" + (i + 1) : "—"}</div>
+      `<div class="rank">${r._n > 0 ? "#" + (i + 1) : "—"}</div>
        <div class="body">
-         <div class="s">${esc(r.spot)}</div>
+         <div class="s">${esc(r.spot)} ${mine ? '<span class="pill ok">你投咗</span>' : ''}</div>
          <div class="a">${esc(r.area || "")}${r.note ? " · " + esc(r.note) : ""}</div>
-         <div class="bar"><i style="width:${(r._v / max * 100).toFixed(0)}%"></i></div>
+         <div class="bar"><i style="width:${(r._n / max * 100).toFixed(0)}%"></i></div>
+         ${r._voters.length ? `<div class="voters">${r._voters.map(n => `<span class="vchip${n === me ? " me" : ""}">${esc(n)}</span>`).join("")}</div>` : ""}
        </div>
-       <div class="cnt">${r._v}</div>`;
+       <div class="cnt">${r._n}</div>`;
+    if (me) card.addEventListener("click", () => toggleVote(r.spot, !mine));
     v.appendChild(card);
   });
+}
+async function toggleVote(spot, on) {
+  const me = getMe(); if (!me) return pickMe();
+  if (!CFG.scriptUrl) { alert("仲未開通寫入（config.js 嘅 scriptUrl 未填，見 APPS_SCRIPT_SETUP.md）"); return; }
+  const row = (DATA.votes || []).find(r => r.spot === spot);
+  if (row) {
+    let voters = String(row.voters || "").split(/[,，、]/).map(s => s.trim()).filter(Boolean);
+    const pos = voters.indexOf(me);
+    if (on && pos < 0) voters.push(me);
+    if (!on && pos >= 0) voters.splice(pos, 1);
+    row.voters = voters.join(","); row.votes = voters.length;
+  }
+  viewVotes(); // 樂觀更新，即刻見到
+  try {
+    await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "vote", spot, name: me, on }) });
+  } catch (_) { /* 寫入通常已成功；gviz 約 1–2 分鐘同步 */ }
 }
 
 function viewPhrases() {
@@ -294,7 +346,11 @@ function renderEditor() {
   v.querySelectorAll(".del-row").forEach(b => b.addEventListener("click", e => {
     EDIT.rows.splice(+e.currentTarget.dataset.i, 1); renderEditor();
   }));
-  add.addEventListener("click", () => { const o = {}; cols.forEach(c => o[c] = ""); EDIT.rows.push(o); renderEditor(); });
+  add.addEventListener("click", () => {
+    const o = {}; cols.forEach(c => o[c] = "");
+    if (tab === "expenses") { o.payer = getMe(); o.split = "all"; const d = new Date(); o.date = (d.getMonth() + 1) + "/" + d.getDate(); }
+    EDIT.rows.push(o); renderEditor();
+  });
   $("#ed-cancel").addEventListener("click", () => { const t = EDIT.tab; EDIT = null; show(t); });
   $("#ed-save").addEventListener("click", saveEdit);
 }
@@ -341,6 +397,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => show(t.dataset.view)));
   document.addEventListener("click", e => { const b = e.target.closest("[data-edit]"); if (b) startEdit(b.dataset.edit); });
   await loadData();
+  renderMeChip();
+  const mc = $("#me-chip"); if (mc) mc.addEventListener("click", pickMe);
   const m = DATA.meta || {};
   if (m.title) $("#m-title").textContent = m.title;
   if (m.subtitle) $("#m-subtitle").textContent = m.subtitle;

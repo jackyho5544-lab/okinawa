@@ -11,6 +11,11 @@ var EDIT_TOKEN = 'CHANGE_ME_改成你自己嘅密碼';
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
+
+    // 投票：唔使密碼，單格更新（人人投得），voters 欄會自動建立
+    if (body.action === 'vote') return handleVote(body);
+
+    // 其餘（改行程/資料）：要密碼，成張表覆寫
     if (body.token !== EDIT_TOKEN) return json({ ok: false, error: '密碼錯誤' });
 
     var tab = String(body.tab || '');
@@ -35,6 +40,34 @@ function doPost(e) {
   } catch (err) {
     return json({ ok: false, error: String(err) });
   }
+}
+
+// 逐人投票：spot=景點, name=投票人, on=true加票/false收回。只改 votes tab 一格。
+function handleVote(body) {
+  var spot = String(body.spot || ''), name = String(body.name || ''), on = !!body.on;
+  if (!spot || !name) return json({ ok: false, error: '缺 spot 或 name' });
+  var lock = LockService.getScriptLock();
+  try { lock.waitLock(8000); } catch (e) { return json({ ok: false, error: '系統繁忙，請再試' }); }
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sh = ss.getSheetByName('votes');
+    if (!sh) return json({ ok: false, error: '冇 votes tab' });
+    var data = sh.getDataRange().getValues();
+    var header = data[0].map(function (h) { return String(h).trim(); });
+    var ci = header.indexOf('spot'), vi = header.indexOf('voters'), ti = header.indexOf('votes');
+    if (ci < 0) return json({ ok: false, error: 'votes tab 冇 spot 欄' });
+    if (vi < 0) { vi = header.length; sh.getRange(1, vi + 1).setValue('voters'); } // 自動加 voters 欄
+    var rowIdx = -1;
+    for (var r = 1; r < data.length; r++) { if (String(data[r][ci]).trim() === spot) { rowIdx = r; break; } }
+    if (rowIdx < 0) return json({ ok: false, error: '搵唔到景點：' + spot });
+    var cur = String(data[rowIdx][vi] == null ? '' : data[rowIdx][vi]).split(/[,，、]/).map(function (s) { return s.trim(); }).filter(String);
+    var pos = cur.indexOf(name);
+    if (on && pos < 0) cur.push(name);
+    if (!on && pos >= 0) cur.splice(pos, 1);
+    sh.getRange(rowIdx + 1, vi + 1).setValue(cur.join(','));
+    if (ti >= 0) sh.getRange(rowIdx + 1, ti + 1).setValue(cur.length); // 同步票數欄
+    return json({ ok: true, spot: spot, voters: cur });
+  } finally { lock.releaseLock(); }
 }
 
 function doGet() {
