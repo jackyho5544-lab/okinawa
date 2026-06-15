@@ -33,7 +33,8 @@ function fetchSheetTab(sheetId, tab) {
     const timer = setTimeout(() => { if (!done) { done = true; cleanup(); reject(new Error("timeout " + tab)); } }, 12000);
     window[cb] = json => { done = true; clearTimeout(timer); cleanup(); try { resolve(parseGviz(json)); } catch (e) { reject(e); } };
     s.onerror = () => { if (!done) { done = true; clearTimeout(timer); cleanup(); reject(new Error("load fail " + tab)); } };
-    s.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(tab)}`;
+    // headers=1：強制第一行做欄名（全文字 tab 否則 gviz 認唔到 header）
+    s.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json;responseHandler:${cb}&headers=1&sheet=${encodeURIComponent(tab)}`;
     document.head.appendChild(s);
   });
 }
