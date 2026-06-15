@@ -3,7 +3,7 @@
    Sheet 每個 tab 名要對應：itinerary / bookings / cars / members / expenses / votes / phrases
    ──────────────────────────────────────────────────────────*/
 const CFG = window.OKINAWA_CONFIG || {};
-const TABS = ["meta","itinerary","bookings","cars","members","expenses","votes","phrases"];
+const TABS = ["meta","stays","itinerary","bookings","cars","members","expenses","votes","phrases"];
 let DATA = {};
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -209,7 +209,30 @@ function viewPhrases() {
   });
 }
 
-const VIEWS = { itinerary: viewItinerary, bookings: viewBookings, cars: viewCars, expenses: viewExpenses, votes: viewVotes, phrases: viewPhrases };
+function viewStays() {
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🏨 住宿</h2>${editBar("改住宿")}</div>`;
+  (DATA.stays || []).forEach(r => {
+    const warn = String(r.note).includes("⚠️");
+    const map = r.map
+      ? `<a class="maps" href="${esc(r.map)}" target="_blank" rel="noopener">🗺️ 地圖</a>`
+      : (r.address ? `<a class="maps" href="${mapsUrl(r.address)}" target="_blank" rel="noopener">🗺️ 地圖</a>` : "");
+    const card = el("div", "card car-card" + (warn ? " warn" : ""));
+    card.innerHTML =
+      `<div class="row">
+        <div class="ico">🏨</div>
+        <div class="body">
+          <div class="t">${esc(r.name)} <span class="pill wait">${esc(r.dates)}</span></div>
+          ${r.address ? `<div class="p">${esc(r.address)}</div>` : ""}
+          <div class="n">🛎️ 入住 ${esc(r.checkin || "-")} ／ 退房 ${esc(r.checkout || "-")}</div>
+          ${r.note ? `<div class="n" style="border-left-color:var(--gold)">${esc(r.note)}</div>` : ""}
+          ${map}
+        </div>
+      </div>`;
+    v.appendChild(card);
+  });
+}
+
+const VIEWS = { itinerary: viewItinerary, stays: viewStays, bookings: viewBookings, cars: viewCars, expenses: viewExpenses, votes: viewVotes, phrases: viewPhrases };
 
 function show(name) {
   document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === name));

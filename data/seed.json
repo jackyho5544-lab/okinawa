@@ -2,9 +2,14 @@
   "meta": {
     "title": "沖繩自駕 2026",
     "subtitle": "17–24 June · 3 對情侶 · 6 人",
-    "hotel": "HOTEL ANTEROOM NAHA（那覇市前島，近泊港）· 23 號住",
+    "hotel": "共 3 間 · 見 🏨 住宿",
     "updated": "seed / memo"
   },
+  "stays": [
+    { "name": "Nest Hotel 那覇久茂地", "dates": "待確認", "address": "2 Chome-22-5 Kumoji, Naha 900-0015", "map": "https://maps.app.goo.gl/3Wty9tgPXnwtpGrq5", "checkin": "15:00", "checkout": "11:00", "note": "⚠️ 日期待確認（17號？定 22–23號？）；同 memo 嘅 ANTEROOM 前島有出入" },
+    { "name": "名護 Nago", "dates": "18/6 → 20/6", "address": "1174-5 Biimata, Nago, Okinawa 905-0005", "map": "https://maps.app.goo.gl/SNZCoJn7VAQsN2VX8", "checkin": "16:00", "checkout": "11:00", "note": "" },
+    { "name": "浦添 / 宜野湾 Mashiki", "dates": "20/6 → 22/6", "address": "3-chōme-4-1 Mashiki, Ginowan-shi, Okinawa 901-2224", "map": "", "checkin": "15:00", "checkout": "10:00", "note": "地址屬宜野湾市真志喜" }
+  ],
   "itinerary": [
     { "day": "Day 1", "date": "2026-06-17 (三)", "time": "20:00", "icon": "🍽️", "title": "夕食 · 琉球壽司 築地青空三代目", "place": "那覇", "address": "那覇市", "note": "已訂 8pm", "booked": "Y" },
 

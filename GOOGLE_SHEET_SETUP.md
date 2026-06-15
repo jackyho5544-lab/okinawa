@@ -12,6 +12,13 @@
 
 - `address` 有嘢就會出「🗺️ 地圖」掣；`booked` 填 `Y` 會出「已訂」標籤。
 
+### tab：`stays`（住宿）
+| name | dates | address | map | checkin | checkout | note |
+|------|-------|---------|-----|---------|----------|------|
+| 名護 Nago | 18/6 → 20/6 | 1174-5 Biimata... | https://maps.app.goo.gl/... | 16:00 | 11:00 | |
+
+- `map` 留空就會用 `address` 自動開 Google Maps。
+
 ### tab：`bookings`（訂位）
 | item | status | detail | owner | link |
 |------|--------|--------|-------|------|
