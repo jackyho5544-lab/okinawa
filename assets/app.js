@@ -16,7 +16,11 @@ function parseGviz(json) {
   const cols = json.table.cols.map(c => (c.label || "").trim());
   return json.table.rows.map(r => {
     const o = {};
-    (r.c || []).forEach((cell, i) => { if (cols[i]) o[cols[i]] = cell ? (cell.v == null ? "" : cell.v) : ""; });
+    (r.c || []).forEach((cell, i) => {
+      if (!cols[i]) return;
+      // 優先用 formatted 值 .f（避免日期變 "Date(2026,5,18)"），否則 .v
+      o[cols[i]] = !cell ? "" : (cell.f != null ? cell.f : (cell.v == null ? "" : cell.v));
+    });
     return o;
   }).filter(o => Object.values(o).some(v => String(v).trim() !== ""));
 }
