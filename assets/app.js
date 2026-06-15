@@ -98,7 +98,7 @@ function viewBookings() {
 
 function viewCars() {
   const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🚗 分車 / 座位</h2>${editBar("改分車")}</div>`;
-  v.appendChild(el("div", "hint", "6 人 3 對 · Porsche 得 2 座 → 全程要 ≥2 架車。喺 Sheet 嘅 members 欄填邊個坐邊架。"));
+  v.appendChild(el("div", "hint", "20–24 共用車（建議 7 座載 6 人＋行李）。其餘車輛安排由各自負責人處理。"));
   (DATA.cars || []).forEach(r => {
     const warn = String(r.car).includes("⚠️");
     const card = el("div", "card car-card" + (warn ? " warn" : ""));
