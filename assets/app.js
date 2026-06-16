@@ -76,11 +76,19 @@ async function loadData() {
       await Promise.all(TABS.filter(t => t !== "meta").map(async t => {
         try { out[t] = await fetchSheetTab(CFG.sheetId, t); } catch { out[t] = null; }
       }));
+      const live = TABS.filter(t => t !== "meta" && out[t] != null).length;
       const seed = await (await fetch("data/seed.json")).json();
       out.meta = seed.meta;
+      if (live === 0) {
+        // 完全讀唔到（離線）→ 用上次成功同步嘅快取
+        const cached = localStorage.getItem("okinawa_cache");
+        if (cached) { DATA = JSON.parse(cached); setSource("📴 離線（上次同步）"); return; }
+      }
       // 只有讀唔到（null）先用 seed；空 tab 當真係空（唔好用 seed 蓋過用戶刪走嘅嘢）
       TABS.forEach(t => { if (out[t] == null) out[t] = seed[t]; });
-      DATA = out; setSource("🟢 Google Sheet live"); return;
+      DATA = out;
+      if (live > 0) { try { localStorage.setItem("okinawa_cache", JSON.stringify(out)); } catch (_) { } }
+      setSource(live === 0 ? "🟡 seed（讀唔到）" : "🟢 Google Sheet live"); return;
     } catch (e) { console.warn("Sheet 讀唔到，用 seed", e); }
   }
   DATA = await (await fetch("data/seed.json")).json();
@@ -95,33 +103,48 @@ function editBar(tab) {
   return "";
 }
 
+// 將一日嘅點串成一條 Google Maps 駕駛路線
+function dayRouteUrl(items) {
+  const pts = items.map(r => String(r.address || r.place || "").trim()).filter(p => p && p !== "—");
+  const uniq = pts.filter((p, i) => i === 0 || p !== pts[i - 1]);
+  if (uniq.length < 2) return "";
+  const e = encodeURIComponent;
+  let u = `https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${e(uniq[0])}&destination=${e(uniq[uniq.length - 1])}`;
+  const wp = uniq.slice(1, -1).slice(0, 9).map(e).join("|");
+  if (wp) u += `&waypoints=${wp}`;
+  return u;
+}
 function viewItinerary() {
   const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>📅 行程</h2>${editBar("itinerary")}</div>`;
   const nn = nowNextCard(); if (nn) v.appendChild(nn);
-  const rows = DATA.itinerary || [];
-  let cur = null;
-  rows.forEach(r => {
-    if (r.day !== cur) {
-      cur = r.day;
-      v.appendChild(el("div", "day-head", `${esc(r.day)} <small>${esc(r.date)}</small> ${wxFor(r.date)}`));
-    }
-    const card = el("div", "card");
-    const booked = String(r.booked).toUpperCase() === "Y"
-      ? '<span class="pill ok">已訂</span>' : "";
-    const maps = (r.address || r.place)
-      ? `<a class="maps" href="${mapsUrl(r.address || r.place)}" target="_blank" rel="noopener">🗺️ 地圖</a>` : "";
-    card.innerHTML =
-      `<div class="row">
-        <div class="time">${esc(r.time)}</div>
-        <div class="ico">${esc(r.icon || "📍")}</div>
-        <div class="body">
-          <div class="t">${esc(r.title)} ${booked}</div>
-          ${r.place ? `<div class="p">${esc(r.place)}</div>` : ""}
-          ${r.note ? `<div class="n">${esc(r.note)}</div>` : ""}
-          ${maps}
-        </div>
-      </div>`;
-    v.appendChild(card);
+  const groups = [];
+  (DATA.itinerary || []).forEach(r => {
+    let g = groups[groups.length - 1];
+    if (!g || g.day !== r.day) { g = { day: r.day, date: r.date, items: [] }; groups.push(g); }
+    g.items.push(r);
+  });
+  groups.forEach(g => {
+    const route = dayRouteUrl(g.items);
+    const rbtn = route ? `<a class="route-link" href="${route}" target="_blank" rel="noopener">🗺️ 路線</a>` : "";
+    v.appendChild(el("div", "day-head", `${esc(g.day)} <small>${esc(g.date)}</small> ${wxFor(g.date)} ${rbtn}`));
+    g.items.forEach(r => {
+      const card = el("div", "card");
+      const booked = String(r.booked).toUpperCase() === "Y" ? '<span class="pill ok">已訂</span>' : "";
+      const maps = (r.address || r.place)
+        ? `<a class="maps" href="${mapsUrl(r.address || r.place)}" target="_blank" rel="noopener">🗺️ 地圖</a>` : "";
+      card.innerHTML =
+        `<div class="row">
+          <div class="time">${esc(r.time)}</div>
+          <div class="ico">${esc(r.icon || "📍")}</div>
+          <div class="body">
+            <div class="t">${esc(r.title)} ${booked}</div>
+            ${r.place ? `<div class="p">${esc(r.place)}</div>` : ""}
+            ${r.note ? `<div class="n">${esc(r.note)}</div>` : ""}
+            ${maps}
+          </div>
+        </div>`;
+      v.appendChild(card);
+    });
   });
 }
 
@@ -243,6 +266,9 @@ function viewVotes() {
     v.appendChild(el("div", "vote-summary", `✅ 已投 ${members.length - notYet.length}/${members.length}` +
       (notYet.length ? ` · 未投：${notYet.map(esc).join("、")}` : " · 全部投晒 🎉")));
   }
+  const planBtn = el("button", "add-row", "📊 用票數砌 21–24 行程草案");
+  planBtn.addEventListener("click", genPlan);
+  v.appendChild(planBtn);
   // 按地區分組（順地理）
   const order = ["南部", "南城", "那覇", "浦添", "中城", "北谷", "讀谷", "恩納", "名護", "—"];
   const byArea = {};
@@ -270,6 +296,34 @@ function voteCard(r, max, me) {
      <div class="cnt">${r._n}</div>`;
   if (me) card.addEventListener("click", e => { if (e.target.closest("a")) return; toggleVote(r.spot, !mine); });
   return card;
+}
+// 用票數＋地理，自動砌 21–24 草案
+function genPlan() {
+  const rows = (DATA.votes || []).map(r => {
+    const n = String(r.voters || "").split(/[,，、]/).map(s => s.trim()).filter(Boolean).length;
+    return { ...r, _n: n };
+  }).filter(r => !/釣魚/.test(r.spot));
+  rows.sort((a, b) => b._n - a._n);
+  const pick = rows.slice(0, 8);
+  const order = ["南部", "南城", "那覇", "浦添", "中城", "北谷", "讀谷", "恩納", "名護", "—"];
+  pick.sort((a, b) => ((order.indexOf(a.area) + 1) || 99) - ((order.indexOf(b.area) + 1) || 99));
+  const days = [["Day 5", "21/6 (日)"], ["Day 6", "22/6 (一)"]];
+  const per = Math.ceil(pick.length / 2) || 1;
+  const ov = el("div", "overlay");
+  let html = `<div class="sheet"><div class="sheet-h">📊 21–24 行程草案</div>`;
+  if (rows.every(r => r._n === 0)) html += `<div class="hint">而家未有人投票，下面係按地區順序嘅建議；大家投咗票會自動改成按票數排。</div>`;
+  days.forEach((d, i) => {
+    const chunk = pick.slice(i * per, (i + 1) * per);
+    if (!chunk.length) return;
+    html += `<div class="plan-day"><b>${d[0]} · ${d[1]}</b>${chunk.map(s => `<div class="plan-spot">${esc(s.icon || "📍")} ${esc(s.spot)} <small>${esc(s.area)}${s._n ? " · " + s._n + " 票" : ""}</small></div>`).join("")}</div>`;
+  });
+  html += `<div class="plan-day"><b>Day 7 · 23/6 (二)</b><div class="plan-spot">🎣 釣魚（已排）＋ 下午國際通</div></div>`;
+  html += `<div class="plan-day"><b>Day 8 · 24/6 (三)</b><div class="plan-spot">✈️ 還車／機場 — 順路：瀨長島 / DFS / Outlet 近機場</div></div>`;
+  html += `<div class="hint" style="margin-top:10px">建議草案啫～ 想用就去 📅 行程 ✏️ 編輯加返；票數變咗可以再撳一次重砌。</div><button class="pick-close">關閉</button></div>`;
+  ov.innerHTML = html;
+  ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+  ov.querySelector(".pick-close").addEventListener("click", () => ov.remove());
+  document.body.appendChild(ov);
 }
 async function toggleVote(spot, on) {
   const me = getMe(); if (!me) return pickMe();
@@ -542,6 +596,7 @@ function show(name) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => { });
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => show(t.dataset.view)));
   document.addEventListener("click", e => { const b = e.target.closest("[data-edit]"); if (b) startEdit(b.dataset.edit); });
   await loadData();
