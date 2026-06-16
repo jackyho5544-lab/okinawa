@@ -422,11 +422,17 @@ function viewPacking() {
 async function togglePack(item, on) {
   if (!CFG.scriptUrl) { alert("未開通寫入（見 APPS_SCRIPT_SETUP.md）"); return; }
   const me = getMe(), row = (DATA.packing || []).find(r => r.item === item);
+  const prev = row ? row.done : "";
   if (row) row.done = on ? (me || "✓") : "";
   viewPacking();
   try {
-    await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "setcell", tab: "packing", keyCol: "item", keyVal: item, col: "done", value: on ? (me || "✓") : "" }) });
-  } catch (_) { }
+    const res = await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "setcell", tab: "packing", keyCol: "item", keyVal: item, col: "done", value: on ? (me || "✓") : "" }) });
+    const j = await res.json();
+    if (!j.ok) throw new Error(j.error || "未知");
+  } catch (e) {
+    if (row) row.done = prev; viewPacking();
+    alert("儲存失敗：" + (e.message || e) + "\n（多數係 Apps Script 未 redeploy 新版本，或未建 packing tab）");
+  }
 }
 
 /* ---- 💬 留言板（append，免密碼）---- */
@@ -450,11 +456,17 @@ async function postBoard() {
   const me = getMe() || "匿名", now = new Date();
   const time = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const row = { time, who: me, msg };
-  (DATA.board = DATA.board || []).push(row);
-  ta.value = ""; viewBoard();
+  const btn = $("#bd-send"); if (btn) { btn.disabled = true; btn.textContent = "送緊…"; }
   try {
-    await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "append", tab: "board", row }) });
-  } catch (_) { }
+    const res = await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "append", tab: "board", row }) });
+    const j = await res.json();
+    if (!j.ok) throw new Error(j.error || "未知");
+    (DATA.board = DATA.board || []).push(row);
+    ta.value = ""; viewBoard();
+  } catch (e) {
+    alert("留言失敗：" + (e.message || e) + "\n（多數係 Apps Script 未 redeploy 新版本，或未建 board tab）");
+    const b = $("#bd-send"); if (b) { b.disabled = false; b.textContent = "送出"; }
+  }
 }
 
 /* ---- 🌤️ 天氣（Open-Meteo，免 key、CORS OK）---- */
