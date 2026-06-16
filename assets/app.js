@@ -3,7 +3,7 @@
    Sheet 每個 tab 名要對應：itinerary / bookings / cars / members / expenses / votes / phrases
    ──────────────────────────────────────────────────────────*/
 const CFG = window.OKINAWA_CONFIG || {};
-const TABS = ["meta","stays","itinerary","bookings","cars","members","expenses","votes","phrases"];
+const TABS = ["meta","stays","itinerary","bookings","members","expenses","votes","packing","board","phrases"];
 let DATA = {};
 let CURRENT = "itinerary";
 let EDIT = null;
@@ -12,9 +12,10 @@ const COLUMNS = {
   itinerary: ["day","date","time","icon","title","place","address","note","booked"],
   stays: ["name","dates","address","map","checkin","checkout","note"],
   bookings: ["item","status","detail","owner","link"],
-  cars: ["car","seats","vendor","pickup","dropoff","members","note"],
   expenses: ["date","item","payer","amount","split","note"],
-  votes: ["spot","area","votes","note","voters"],
+  votes: ["spot","area","icon","address","note","votes","voters"],
+  packing: ["item","cat","who","done"],
+  board: ["time","who","msg"],
   phrases: ["title","jp","romaji","zh"]
 };
 
@@ -95,12 +96,13 @@ function editBar(tab) {
 
 function viewItinerary() {
   const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>📅 行程</h2>${editBar("itinerary")}</div>`;
+  const nn = nowNextCard(); if (nn) v.appendChild(nn);
   const rows = DATA.itinerary || [];
   let cur = null;
   rows.forEach(r => {
     if (r.day !== cur) {
       cur = r.day;
-      v.appendChild(el("div", "day-head", `${esc(r.day)} <small>${esc(r.date)}</small>`));
+      v.appendChild(el("div", "day-head", `${esc(r.day)} <small>${esc(r.date)}</small> ${wxFor(r.date)}`));
     }
     const card = el("div", "card");
     const booked = String(r.booked).toUpperCase() === "Y"
@@ -243,16 +245,18 @@ function viewVotes() {
   rows.forEach((r, i) => {
     const mine = me && r._voters.includes(me);
     const card = el("div", "vote" + (mine ? " voted" : "") + (me ? " tappable" : ""));
+    const mq = r.address || r.spot;
     card.innerHTML =
       `<div class="rank">${r._n > 0 ? "#" + (i + 1) : "—"}</div>
        <div class="body">
-         <div class="s">${esc(r.spot)} ${mine ? '<span class="pill ok">你投咗</span>' : ''}</div>
-         <div class="a">${esc(r.area || "")}${r.note ? " · " + esc(r.note) : ""}</div>
+         <div class="s"><span class="vico">${esc(r.icon || "📍")}</span>${esc(r.spot)} ${mine ? '<span class="pill ok">你投咗</span>' : ''}</div>
+         <div class="a"><span class="area-chip">${esc(r.area || "—")}</span>${r.note ? " " + esc(r.note) : ""}</div>
          <div class="bar"><i style="width:${(r._n / max * 100).toFixed(0)}%"></i></div>
          ${r._voters.length ? `<div class="voters">${r._voters.map(n => `<span class="vchip${n === me ? " me" : ""}">${esc(n)}</span>`).join("")}</div>` : ""}
+         <a class="maps vote-map" href="${mapsUrl(mq)}" target="_blank" rel="noopener">🗺️ 地圖</a>
        </div>
        <div class="cnt">${r._n}</div>`;
-    if (me) card.addEventListener("click", () => toggleVote(r.spot, !mine));
+    if (me) card.addEventListener("click", e => { if (e.target.closest("a")) return; toggleVote(r.spot, !mine); });
     v.appendChild(card);
   });
 }
@@ -397,7 +401,106 @@ function toast(msg) {
   setTimeout(() => { d.classList.remove("show"); setTimeout(() => d.remove(), 300); }, 2600);
 }
 
-const VIEWS = { itinerary: viewItinerary, stays: viewStays, bookings: viewBookings, cars: viewCars, expenses: viewExpenses, votes: viewVotes, phrases: viewPhrases };
+/* ---- 🧳 執嘢 checklist（一撳剔，免密碼）---- */
+function viewPacking() {
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>🧳 執嘢 checklist</h2>${editBar("packing")}</div>`;
+  const rows = DATA.packing || [];
+  const done = rows.filter(r => String(r.done).trim()).length;
+  v.appendChild(el("div", "vote-summary", `已搞掂 ${done}/${rows.length}`));
+  let curCat = null;
+  rows.forEach(r => {
+    if (r.cat !== curCat) { curCat = r.cat; v.appendChild(el("div", "day-head", esc(r.cat || "其他"))); }
+    const isDone = !!String(r.done).trim();
+    const card = el("div", "card pk" + (isDone ? " pk-done" : ""));
+    card.innerHTML =
+      `<div class="pk-row"><span class="pk-box">${isDone ? "✅" : "⬜"}</span>
+        <span class="pk-item">${esc(r.item)}</span>${isDone ? `<span class="vchip">${esc(r.done)}</span>` : ""}</div>`;
+    card.addEventListener("click", () => togglePack(r.item, !isDone));
+    v.appendChild(card);
+  });
+}
+async function togglePack(item, on) {
+  if (!CFG.scriptUrl) { alert("未開通寫入（見 APPS_SCRIPT_SETUP.md）"); return; }
+  const me = getMe(), row = (DATA.packing || []).find(r => r.item === item);
+  if (row) row.done = on ? (me || "✓") : "";
+  viewPacking();
+  try {
+    await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "setcell", tab: "packing", keyCol: "item", keyVal: item, col: "done", value: on ? (me || "✓") : "" }) });
+  } catch (_) { }
+}
+
+/* ---- 💬 留言板（append，免密碼）---- */
+function viewBoard() {
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>💬 留言板</h2></div>`;
+  const me = getMe();
+  const box = el("div", "board-box");
+  box.innerHTML = `<textarea id="bd-msg" rows="2" placeholder="${me ? "以 " + esc(me) + " 留言…" : "留言…（建議右上揀返名）"}"></textarea><button class="edit-link" id="bd-send">送出</button>`;
+  v.appendChild(box);
+  $("#bd-send").addEventListener("click", postBoard);
+  (DATA.board || []).slice().reverse().forEach(r => {
+    const card = el("div", "card bd");
+    card.innerHTML = `<div class="bd-h"><b>${esc(r.who || "匿名")}</b><span>${esc(r.time || "")}</span></div><div class="bd-m">${esc(r.msg)}</div>`;
+    v.appendChild(card);
+  });
+}
+async function postBoard() {
+  const ta = $("#bd-msg"), msg = (ta.value || "").trim();
+  if (!msg) return;
+  if (!CFG.scriptUrl) { alert("未開通寫入（見 APPS_SCRIPT_SETUP.md）"); return; }
+  const me = getMe() || "匿名", now = new Date();
+  const time = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const row = { time, who: me, msg };
+  (DATA.board = DATA.board || []).push(row);
+  ta.value = ""; viewBoard();
+  try {
+    await fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "append", tab: "board", row }) });
+  } catch (_) { }
+}
+
+/* ---- 🌤️ 天氣（Open-Meteo，免 key、CORS OK）---- */
+let WX = null;
+const wxEmoji = c => c === 0 ? "☀️" : c <= 2 ? "🌤️" : c === 3 ? "☁️" : (c >= 45 && c <= 48) ? "🌫️" : (c >= 51 && c <= 67) ? "🌦️" : (c >= 71 && c <= 77) ? "❄️" : (c >= 80 && c <= 82) ? "🌧️" : c >= 95 ? "⛈️" : "🌥️";
+async function loadWeather() {
+  try {
+    const u = "https://api.open-meteo.com/v1/forecast?latitude=26.21&longitude=127.68&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&start_date=2026-06-17&end_date=2026-06-24";
+    const d = (await (await fetch(u)).json()).daily; if (!d) return;
+    WX = {}; d.time.forEach((t, i) => { WX[t] = { c: d.weather_code[i], hi: Math.round(d.temperature_2m_max[i]), lo: Math.round(d.temperature_2m_min[i]), p: d.precipitation_probability_max[i] }; });
+  } catch (_) { WX = null; }
+}
+function wxFor(dateStr) {
+  if (!WX) return "";
+  const m = String(dateStr).match(/(\d{4})-(\d{2})-(\d{2})/); if (!m) return "";
+  const w = WX[`${m[1]}-${m[2]}-${m[3]}`]; if (!w) return "";
+  return `<span class="wx">${wxEmoji(w.c)} ${w.hi}°/${w.lo}° ☔${w.p}%</span>`;
+}
+
+/* ---- 🎯 而家 / 下一個 + 倒數 ---- */
+function itinWhen(r) {
+  const dm = String(r.date).match(/(\d{4})-(\d{2})-(\d{2})/); if (!dm) return null;
+  let h = 9, mi = 0; const tm = String(r.time).match(/(\d{1,2}):(\d{2})/);
+  if (tm) { h = +tm[1]; mi = +tm[2]; } else if (/下午|傍晚/.test(r.time)) h = 14;
+  return new Date(+dm[1], +dm[2] - 1, +dm[3], h, mi);
+}
+function nowNextCard() {
+  const items = (DATA.itinerary || []).map(r => ({ r, t: itinWhen(r) })).filter(x => x.t).sort((a, b) => a.t - b.t);
+  if (!items.length) return null;
+  const now = new Date(), first = items[0].t, last = items[items.length - 1].t, card = el("div", "nn");
+  if (now < first) {
+    const days = Math.ceil((first - now) / 86400000);
+    card.innerHTML = `<div class="nn-big">🚀 仲有 ${days} 日出發！</div><div class="nn-sub">第一站：${esc(items[0].r.title)}</div>`;
+  } else if (now > last) {
+    card.innerHTML = `<div class="nn-big">🎉 旅程完滿！</div>`;
+  } else {
+    const next = items.find(x => x.t >= now) || items[items.length - 1];
+    const mins = Math.max(0, Math.round((next.t - now) / 60000));
+    const when = mins < 60 ? `${mins} 分鐘後` : `${Math.floor(mins / 60)} 小時 ${mins % 60} 分後`;
+    const mq = next.r.address || next.r.place || next.r.title;
+    card.innerHTML = `<div class="nn-lbl">⏰ 下一個（${when}）</div><div class="nn-big">${esc(next.r.icon || "📍")} ${esc(next.r.title)}</div><div class="nn-sub">${esc(next.r.time)} · ${esc(next.r.place || "")} <a href="${mapsUrl(mq)}" target="_blank" rel="noopener">🗺️ 地圖</a></div>`;
+  }
+  return card;
+}
+
+const VIEWS = { itinerary: viewItinerary, stays: viewStays, bookings: viewBookings, expenses: viewExpenses, votes: viewVotes, packing: viewPacking, board: viewBoard, phrases: viewPhrases };
 
 function show(name) {
   CURRENT = name;
@@ -413,6 +516,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadData();
   renderMeChip();
   const mc = $("#me-chip"); if (mc) mc.addEventListener("click", pickMe);
+  loadWeather().then(() => { if (CURRENT === "itinerary") viewItinerary(); }); // 天氣到就補上
   const m = DATA.meta || {};
   if (m.title) $("#m-title").textContent = m.title;
   if (m.subtitle) $("#m-subtitle").textContent = m.subtitle;
