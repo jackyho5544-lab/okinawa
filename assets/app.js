@@ -486,8 +486,11 @@ function nowNextCard() {
   if (!items.length) return null;
   const now = new Date(), first = items[0].t, last = items[items.length - 1].t, card = el("div", "nn");
   if (now < first) {
-    const days = Math.ceil((first - now) / 86400000);
-    card.innerHTML = `<div class="nn-big">🚀 仲有 ${days} 日出發！</div><div class="nn-sub">第一站：${esc(items[0].r.title)}</div>`;
+    const start = new Date(first.getFullYear(), first.getMonth(), first.getDate());
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = Math.round((start - today) / 86400000); // 用日曆日計
+    card.innerHTML = (days <= 0 ? `<div class="nn-big">🎒 今日出發！</div>` : `<div class="nn-big">🚀 仲有 ${days} 日出發！</div>`)
+      + `<div class="nn-sub">第一站：${esc(items[0].r.title)}</div>`;
   } else if (now > last) {
     card.innerHTML = `<div class="nn-big">🎉 旅程完滿！</div>`;
   } else {
