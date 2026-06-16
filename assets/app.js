@@ -320,6 +320,12 @@ function startEdit(tab) {
   EDIT = { tab, rows: (DATA[tab] || []).map(r => ({ ...r })) };
   renderEditor();
 }
+function blankRow(tab, cols, ref) {
+  const o = {}; cols.forEach(c => o[c] = "");
+  if (tab === "expenses") { o.payer = getMe(); o.split = "all"; const d = new Date(); o.date = (d.getMonth() + 1) + "/" + d.getDate(); }
+  if (tab === "itinerary" && ref) { o.day = ref.day || ""; o.date = ref.date || ""; } // 帶埋上一行嘅日子，插中間更順
+  return o;
+}
 function renderEditor() {
   const tab = EDIT.tab, cols = COLUMNS[tab];
   const long = { note: 1, detail: 1, jp: 1, address: 1 };
@@ -332,25 +338,33 @@ function renderEditor() {
   EDIT.rows.forEach((row, idx) => {
     const card = el("div", "card edit-card");
     card.innerHTML =
-      `<div class="erow-head"><b>#${idx + 1}</b><button class="del-row" data-i="${idx}">🗑️ 刪呢行</button></div>` +
+      `<div class="erow-head"><b>#${idx + 1}</b>
+        <span class="erow-btns">
+          <button class="row-btn" data-act="up" data-i="${idx}" title="上移">↑</button>
+          <button class="row-btn" data-act="down" data-i="${idx}" title="下移">↓</button>
+          <button class="row-btn ins" data-act="ins" data-i="${idx}">＋ 下面插一行</button>
+          <button class="row-btn del" data-act="del" data-i="${idx}">🗑️</button>
+        </span></div>` +
       cols.map(c => long[c]
         ? `<label class="efield"><span>${esc(c)}</span><textarea data-i="${idx}" data-c="${esc(c)}" rows="2">${esc(row[c] || "")}</textarea></label>`
         : `<label class="efield"><span>${esc(c)}</span><input data-i="${idx}" data-c="${esc(c)}" value="${esc(row[c] || "")}"></label>`).join("");
     v.appendChild(card);
   });
-  const add = el("button", "add-row", "＋ 加一行");
+  const add = el("button", "add-row", "＋ 喺最底加一行");
   v.appendChild(add);
   v.querySelectorAll("[data-c]").forEach(inp => inp.addEventListener("input", e => {
     EDIT.rows[+e.target.dataset.i][e.target.dataset.c] = e.target.value;
   }));
-  v.querySelectorAll(".del-row").forEach(b => b.addEventListener("click", e => {
-    EDIT.rows.splice(+e.currentTarget.dataset.i, 1); renderEditor();
+  v.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", e => {
+    const i = +e.currentTarget.dataset.i, act = e.currentTarget.dataset.act, rows = EDIT.rows;
+    if (act === "del") rows.splice(i, 1);
+    else if (act === "up" && i > 0) { const t = rows[i - 1]; rows[i - 1] = rows[i]; rows[i] = t; }
+    else if (act === "down" && i < rows.length - 1) { const t = rows[i + 1]; rows[i + 1] = rows[i]; rows[i] = t; }
+    else if (act === "ins") rows.splice(i + 1, 0, blankRow(tab, cols, rows[i]));
+    else return;
+    renderEditor();
   }));
-  add.addEventListener("click", () => {
-    const o = {}; cols.forEach(c => o[c] = "");
-    if (tab === "expenses") { o.payer = getMe(); o.split = "all"; const d = new Date(); o.date = (d.getMonth() + 1) + "/" + d.getDate(); }
-    EDIT.rows.push(o); renderEditor();
-  });
+  add.addEventListener("click", () => { EDIT.rows.push(blankRow(tab, cols, EDIT.rows[EDIT.rows.length - 1])); renderEditor(); });
   $("#ed-cancel").addEventListener("click", () => { const t = EDIT.tab; EDIT = null; show(t); });
   $("#ed-save").addEventListener("click", saveEdit);
 }

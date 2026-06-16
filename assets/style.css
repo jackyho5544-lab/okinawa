@@ -128,6 +128,12 @@ a{color:var(--teal-d)}
 .erow-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;
   font-size:13px;color:var(--teal-d);border-bottom:1px solid var(--line);padding-bottom:6px}
 .del-row{border:0;background:#fdecea;color:#c0392b;font-size:12px;padding:4px 10px;border-radius:16px;font-family:inherit}
+.erow-btns{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.row-btn{border:1px solid var(--line);background:#f7fbfb;color:var(--teal-d);font-size:12px;
+  padding:4px 9px;border-radius:14px;font-family:inherit;line-height:1}
+.row-btn.ins{border-color:var(--teal);color:var(--teal-d);background:#f1fafa}
+.row-btn.del{border-color:#f3c9c4;background:#fdecea;color:#c0392b}
+.row-btn:active{transform:scale(.95)}
 .efield{display:block;margin:0 0 8px}
 .efield span{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
 .efield input,.efield textarea{width:100%;border:1px solid var(--line);border-radius:9px;
