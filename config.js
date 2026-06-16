@@ -13,7 +13,7 @@ window.OKINAWA_CONFIG = {
 
   // App 內直接編輯（寫返去 Sheet）的 Apps Script Web App /exec URL
   // 部署教學見 APPS_SCRIPT_SETUP.md。填咗之後，每個 tab 會出「✏️ 編輯」掣。
-  scriptUrl: "https://script.google.com/macros/s/AKfycbztIF0T1NK0K66_UzpnjbWruMk6JLC7RfReKd1JDzGpUoRnPIowR4l57jOexaJym8ZL/exec",
+  scriptUrl: "https://script.google.com/macros/s/AKfycbyl28SNLXVNbOTbV9adqTG5N60YCduVu6OSuKyKs742GONXxcHjL-jlr6p9t_LNpfO9/exec",
 
   // 投票用嘅 Google Form 連結（可選）
   voteFormUrl: "",
