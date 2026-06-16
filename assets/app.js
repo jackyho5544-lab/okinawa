@@ -233,7 +233,7 @@ function viewVotes() {
   const rows = (DATA.votes || []).map(r => {
     const voters = String(r.voters || "").split(/[,，、]/).map(s => s.trim()).filter(Boolean);
     return { ...r, _voters: voters, _n: voters.length };
-  }).sort((a, b) => b._n - a._n);
+  });
   const max = Math.max(1, ...rows.map(r => r._n));
   // 投票進度
   const members = (DATA.members || []).map(m => m.name);
@@ -243,23 +243,33 @@ function viewVotes() {
     v.appendChild(el("div", "vote-summary", `✅ 已投 ${members.length - notYet.length}/${members.length}` +
       (notYet.length ? ` · 未投：${notYet.map(esc).join("、")}` : " · 全部投晒 🎉")));
   }
-  rows.forEach((r, i) => {
-    const mine = me && r._voters.includes(me);
-    const card = el("div", "vote" + (mine ? " voted" : "") + (me ? " tappable" : ""));
-    const mq = r.address || r.spot;
-    card.innerHTML =
-      `<div class="rank">${r._n > 0 ? "#" + (i + 1) : "—"}</div>
-       <div class="body">
-         <div class="s"><span class="vico">${esc(r.icon || "📍")}</span>${esc(r.spot)} ${mine ? '<span class="pill ok">你投咗</span>' : ''}</div>
-         <div class="a"><span class="area-chip">${esc(r.area || "—")}</span>${r.note ? " " + esc(r.note) : ""}</div>
-         <div class="bar"><i style="width:${(r._n / max * 100).toFixed(0)}%"></i></div>
-         ${r._voters.length ? `<div class="voters">${r._voters.map(n => `<span class="vchip${n === me ? " me" : ""}">${esc(n)}</span>`).join("")}</div>` : ""}
-         <a class="maps vote-map" href="${mapsUrl(mq)}" target="_blank" rel="noopener">🗺️ 地圖</a>
-       </div>
-       <div class="cnt">${r._n}</div>`;
-    if (me) card.addEventListener("click", e => { if (e.target.closest("a")) return; toggleVote(r.spot, !mine); });
-    v.appendChild(card);
+  // 按地區分組（順地理）
+  const order = ["南部", "南城", "那覇", "浦添", "中城", "北谷", "讀谷", "恩納", "名護", "—"];
+  const byArea = {};
+  rows.forEach(r => { const a = r.area || "—"; (byArea[a] = byArea[a] || []).push(r); });
+  Object.keys(byArea).sort((a, b) => {
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  }).forEach(area => {
+    v.appendChild(el("div", "day-head", `📍 ${esc(area)}`));
+    byArea[area].sort((a, b) => b._n - a._n).forEach(r => v.appendChild(voteCard(r, max, me)));
   });
+}
+function voteCard(r, max, me) {
+  const mine = me && r._voters.includes(me);
+  const card = el("div", "vote" + (mine ? " voted" : "") + (me ? " tappable" : ""));
+  const mq = r.address || r.spot;
+  card.innerHTML =
+    `<div class="body">
+       <div class="s"><span class="vico">${esc(r.icon || "📍")}</span>${esc(r.spot)} ${mine ? '<span class="pill ok">你投咗</span>' : ''}</div>
+       ${r.note ? `<div class="a">${esc(r.note)}</div>` : ""}
+       ${r._n ? `<div class="bar"><i style="width:${(r._n / max * 100).toFixed(0)}%"></i></div>` : ""}
+       ${r._voters.length ? `<div class="voters">${r._voters.map(n => `<span class="vchip${n === me ? " me" : ""}">${esc(n)}</span>`).join("")}</div>` : ""}
+       <a class="maps vote-map" href="${mapsUrl(mq)}" target="_blank" rel="noopener">🗺️ 地圖</a>
+     </div>
+     <div class="cnt">${r._n}</div>`;
+  if (me) card.addEventListener("click", e => { if (e.target.closest("a")) return; toggleVote(r.spot, !mine); });
+  return card;
 }
 async function toggleVote(spot, on) {
   const me = getMe(); if (!me) return pickMe();
@@ -438,7 +448,12 @@ async function togglePack(item, on) {
 
 /* ---- 💬 留言板（append，免密碼）---- */
 function viewBoard() {
-  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>💬 留言板</h2></div>`;
+  const v = $("#view"); v.innerHTML = `<div class="section-bar"><h2>💬 留言 / 打卡</h2></div>`;
+  if (CFG.albumUrl) {
+    const a = el("a", "album-btn"); a.href = CFG.albumUrl; a.target = "_blank"; a.rel = "noopener";
+    a.innerHTML = "📸 打卡相簿（iCloud 共享）— 加 / 睇相";
+    v.appendChild(a);
+  }
   const me = getMe();
   const box = el("div", "board-box");
   box.innerHTML = `<textarea id="bd-msg" rows="2" placeholder="${me ? "以 " + esc(me) + " 留言…" : "留言…（建議右上揀返名）"}"></textarea><button class="edit-link" id="bd-send">送出</button>`;

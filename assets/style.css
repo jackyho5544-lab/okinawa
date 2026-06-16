@@ -113,7 +113,8 @@ a{color:var(--teal-d)}
 .vote .body .a{font-size:11.5px;color:var(--muted);margin-top:2px}
 .vote .bar{height:7px;background:#eef4f3;border-radius:7px;margin-top:6px;overflow:hidden}
 .vote .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--sand))}
-.vote .cnt{flex:0 0 auto;font-weight:800;color:var(--teal-d);font-size:15px}
+.vote .cnt{flex:0 0 auto;min-width:32px;height:32px;border-radius:50%;background:var(--mint);
+  color:var(--teal-d);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
 .vote.tappable{cursor:pointer}
 .vote.tappable:active{transform:scale(.99)}
 .vote.voted{border-color:var(--teal);background:#eefaf8;box-shadow:0 0 0 1.5px var(--teal) inset}
@@ -162,6 +163,11 @@ a{color:var(--teal-d)}
 .bd-h{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
 .bd-h b{color:var(--teal-d)}
 .bd-m{font-size:14px;white-space:pre-wrap;word-break:break-word}
+
+/* 📸 打卡相簿掣 */
+.album-btn{display:block;text-align:center;text-decoration:none;font-weight:800;font-size:14.5px;
+  color:#fff;background:linear-gradient(135deg,var(--sand) 0%,#e89a2e 100%);border-radius:16px;
+  padding:14px;margin-bottom:13px;box-shadow:0 6px 18px rgba(233,154,46,.28)}
 
 /* 編輯器 */
 .ed-actions{display:flex;gap:6px}
