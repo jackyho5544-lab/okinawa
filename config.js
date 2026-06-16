@@ -16,7 +16,7 @@ window.OKINAWA_CONFIG = {
   scriptUrl: "https://script.google.com/macros/s/AKfycbyl28SNLXVNbOTbV9adqTG5N60YCduVu6OSuKyKs742GONXxcHjL-jlr6p9t_LNpfO9/exec",
 
   // 📸 打卡相簿（建議用 iCloud 共享相簿連結；填咗會喺「留言」tab 出個掣）
-  albumUrl: "",
+  albumUrl: "https://www.icloud.com/sharedalbum/#B2QGY8gBY8aTTQo",
 
   // 投票用嘅 Google Form 連結（可選）
   voteFormUrl: "",
