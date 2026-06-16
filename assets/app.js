@@ -64,7 +64,7 @@ function fetchSheetTab(sheetId, tab) {
     window[cb] = json => { done = true; clearTimeout(timer); cleanup(); try { resolve(parseGviz(json)); } catch (e) { reject(e); } };
     s.onerror = () => { if (!done) { done = true; clearTimeout(timer); cleanup(); reject(new Error("load fail " + tab)); } };
     // headers=1：強制第一行做欄名（全文字 tab 否則 gviz 認唔到 header）
-    s.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json;responseHandler:${cb}&headers=1&sheet=${encodeURIComponent(tab)}`;
+    s.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json;responseHandler:${cb}&headers=1&sheet=${encodeURIComponent(tab)}&_=${Date.now()}`;
     document.head.appendChild(s);
   });
 }
@@ -78,7 +78,8 @@ async function loadData() {
       }));
       const seed = await (await fetch("data/seed.json")).json();
       out.meta = seed.meta;
-      TABS.forEach(t => { if (!out[t] || !out[t].length) out[t] = seed[t]; }); // tab 缺就用 seed
+      // 只有讀唔到（null）先用 seed；空 tab 當真係空（唔好用 seed 蓋過用戶刪走嘅嘢）
+      TABS.forEach(t => { if (out[t] == null) out[t] = seed[t]; });
       DATA = out; setSource("🟢 Google Sheet live"); return;
     } catch (e) { console.warn("Sheet 讀唔到，用 seed", e); }
   }
