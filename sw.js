@@ -1,6 +1,6 @@
 /* 沖繩 dashboard — Service Worker（離線快取 app 外殼）
    bump CACHE 同 ?v= 一齊升，就會自動清舊快取載新版。 */
-const CACHE = "okinawa-v10";
+const CACHE = "okinawa-v11";
 const ASSETS = [
   "./", "./index.html",
   "./config.js?v=10", "./assets/app.js?v=10", "./assets/style.css?v=10",

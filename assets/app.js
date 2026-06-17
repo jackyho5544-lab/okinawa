@@ -9,8 +9,8 @@ let CURRENT = "itinerary";
 let EDIT = null;
 // 可 in-app 編輯嘅 tab 同欄位順序（要同 Sheet 一致）
 const COLUMNS = {
-  itinerary: ["day","date","time","icon","title","place","address","note","booked"],
-  stays: ["name","dates","address","map","checkin","checkout","note"],
+  itinerary: ["day","date","time","icon","title","place","address","phone","note","booked"],
+  stays: ["name","dates","address","phone","map","checkin","checkout","note"],
   bookings: ["item","status","detail","owner","link"],
   expenses: ["date","item","payer","amount","split","note"],
   votes: ["spot","area","icon","address","note","votes","voters"],
@@ -40,6 +40,12 @@ const $ = (s, r = document) => r.querySelector(s);
 const el = (t, c, html) => { const e = document.createElement(t); if (c) e.className = c; if (html != null) e.innerHTML = html; return e; };
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
 const mapsUrl = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+// 電話：一撳打去訂位／複製個號碼入車 GPS（カーナビ 電話番号検索）
+function phoneChip(phone) {
+  if (!phone) return "";
+  const d = String(phone).replace(/[^0-9+]/g, "");
+  return `<div class="tel-row"><a class="tel" href="tel:${d}">📞 ${esc(phone)}</a><button class="tel-copy" data-tel="${d}">複製畀車GPS</button></div>`;
+}
 
 /* ---- Google Sheet gviz 解析（用 JSONP 繞過 CORS）---- */
 function parseGviz(json) {
@@ -141,6 +147,7 @@ function viewItinerary() {
             ${r.place ? `<div class="p">${esc(r.place)}</div>` : ""}
             ${r.note ? `<div class="n">${esc(r.note)}</div>` : ""}
             ${maps}
+            ${phoneChip(r.phone)}
           </div>
         </div>`;
       v.appendChild(card);
@@ -376,6 +383,7 @@ function viewStays() {
           <div class="n">🛎️ 入住 ${esc(r.checkin || "-")} ／ 退房 ${esc(r.checkout || "-")}</div>
           ${r.note ? `<div class="n" style="border-left-color:var(--gold)">${esc(r.note)}</div>` : ""}
           ${map}
+          ${phoneChip(r.phone)}
         </div>
       </div>`;
     v.appendChild(card);
@@ -598,7 +606,10 @@ function show(name) {
 document.addEventListener("DOMContentLoaded", async () => {
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => { });
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => show(t.dataset.view)));
-  document.addEventListener("click", e => { const b = e.target.closest("[data-edit]"); if (b) startEdit(b.dataset.edit); });
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-edit]"); if (b) { startEdit(b.dataset.edit); return; }
+    const c = e.target.closest(".tel-copy"); if (c) { try { navigator.clipboard.writeText(c.dataset.tel); } catch (_) { } c.textContent = "✅ 已複製"; setTimeout(() => c.textContent = "複製畀車GPS", 1500); }
+  });
   await loadData();
   renderMeChip();
   const mc = $("#me-chip"); if (mc) mc.addEventListener("click", pickMe);
