@@ -3,7 +3,7 @@
 const CACHE = "okinawa-v11";
 const ASSETS = [
   "./", "./index.html",
-  "./config.js?v=10", "./assets/app.js?v=10", "./assets/style.css?v=10",
+  "./config.js?v=11", "./assets/app.js?v=11", "./assets/style.css?v=11",
   "./data/seed.json", "./manifest.webmanifest"
 ];
 
